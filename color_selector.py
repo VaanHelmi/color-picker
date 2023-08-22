@@ -4,18 +4,16 @@ import pyautogui
 import getpixelcolor
 import pyperclip
 
-# python -m IPython .\color_selector.py
-
-savedRgb = [] # RGB muodossa värit. savedRgb[-1] on viimeisin kursorin kohdalla oleva väri
-savedHex = [] # Hex muodossa värit
-isLockOn = False # ns. lukitsee sen hetkisen värin
+savedRgb = [] # RGB color codes
+savedHex = [] # Hex color codes
+isLockOn = False # Locks the current color code
 
 window = pyglet.window.Window(500, 500)
 window.set_caption("Color Picker")
 batch = pyglet.graphics.Batch()
 
 labelText = "Pic a color"
-RgbLabel = pyglet.text.Label(labelText,
+rgbLabel = pyglet.text.Label(labelText,
                         font_name='Times New Roman',
                         font_size=36,
                         x=window.width//2, y=window.height//1.3,
@@ -27,10 +25,10 @@ hexLabel = pyglet.text.Label(hexCodeText,
                         x=window.width//2, y=window.height//2,
                         anchor_x='center', anchor_y='center')
 
-# outerCircle antaa circlelle valkean border colorin.
-outerCircle = shapes.Circle(250, 100, 82, color=(255, 255, 255), batch=batch) 
+# Gives the color circle a white border
+outerCircle = shapes.Circle(250, 100, 82, color=(255, 255, 255), batch=batch)
 
-# ympyrä, jossa väri vaihtuu kursorin alla olevan värin mukana
+# Circle which changes color
 circleColor = (0, 0, 0)
 circle = shapes.Circle(250, 100, 80, color=circleColor, batch=batch)
 
@@ -40,43 +38,43 @@ def createWindow():
         global isLockOn
         window.clear()
         batch.draw()
-        RgbLabel.draw()
+        rgbLabel.draw()
         hexLabel.draw()
-        changeLabel()
+        changeRgbLabel()
         changeHexText()
         changeCircleColor()
         rgbToHex()
-        if isLockOn is False: # Jos värikoodin "lukko" ei ole päällä
+        if isLockOn is False: # If color lock not on
             try:
                 x_cursor, y_cursor = cursorLocation()
                 getColor(x_cursor, y_cursor)
             except TypeError:
-                return
                 #print("pyautogui kirjasto toimii vain main screenillä")
-        else: # Jos värikoodin "lukko" on päällä, ei haeta cursorin paikkaa ja värejä
+                return
+        else: # If color lock on, do nothing
             return
     pyglet.app.event_loop.run()
-    return window, RgbLabel, hexLabel, batch
+    return window, rgbLabel, hexLabel, batch
 
 # def screenSize():
-#     print(pyautogui.size()) # Antaa näytön koon jos tarvitsee. Vasen ylänurkka on (0,0)
+#     print(pyautogui.size()) # Prints screen size. Upper left corner (0,0)
 
 @window.event
 def on_key_press(symbol, modifiers):
     global isLockOn
     print(f"näppäimistön symboli: {symbol} ja modifier: {modifiers}")
-    # Symboli ja numero:
+    # Key symbol and number:
     # L = 108   Q = 133   1 = 49   2 = 50
-    if isLockOn == True and symbol == 108: # Poistaa värikoodin lukon
+    if isLockOn == True and symbol == 108: # Removes color lock
         isLockOn = False
-    elif symbol == 108: # Lukitsee värikoodin
+    elif symbol == 108: # Locks color
         isLockOn = True
     if symbol == 113:
         pyglet.app.EventLoop.has_exit = True
-    if symbol == 49: # Kopioi RGB koodin kun painaa näppäintä 1
+    if symbol == 49: # Copy RGB code when you press 1
         rgbCodeCopy = str(savedRgb[-1])
         pyperclip.copy(rgbCodeCopy)
-    if symbol == 50: # Kopioi HEX koodin kun painaa näppäintä 2
+    if symbol == 50: # Copy Hex code when you press 2
         hexCodeCopy = str(savedHex[-1])
         pyperclip.copy(hexCodeCopy)
 
@@ -84,7 +82,6 @@ def cursorLocation():
     position = pyautogui.position()
     x = position[0]
     y = position[1]
-    #print(x, y)
 
     if pyautogui.onScreen(x, y) == True:
         return x, y
@@ -96,16 +93,16 @@ def getColor(x, y):
     savedRgb.append(color)
     return color
 
-def rgbToHex(): # Muuntaa RGB värikoodin Hex muotoon
+def rgbToHex(): # Changes RGB code to Hex
     if savedRgb != []:
         hexCode = ('#%02x%02x%02x' % savedRgb[-1])
         #print('#%02x%02x%02x' % savedRgb[-1])
         savedHex.append(hexCode)
 
 @window.event
-def changeLabel():
+def changeRgbLabel():
     if savedRgb != []:
-        RgbLabel.text = f"RGB {str(savedRgb[-1])}"
+        rgbLabel.text = f"RGB {str(savedRgb[-1])}"
 
 @window.event
 def changeHexText():
