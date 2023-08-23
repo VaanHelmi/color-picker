@@ -18,7 +18,7 @@ batch = pyglet.graphics.Batch()
 backgroundColorBox = shapes.Rectangle(0, 0, 500, 500, color=(255, 255, 255), batch=batch)
 
 # Copy picture without hover
-copyPic = pyglet.image.load("clip1.png")
+copyPic = image.load("clip1.png")
 imgWidth = 20
 imgHeight = 28
 copyPic.width = imgWidth
@@ -163,7 +163,7 @@ def changeRgbLabel():
 @window.event
 def changeHexText():
     if savedHex != []:
-        hexLabel.text = f"Hex {str(savedHex[-1])}"
+        hexLabel.text = f"Hex #{str(savedHex[-1])}"
 
 @window.event
 def changeBoxColor():
