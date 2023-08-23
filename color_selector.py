@@ -29,6 +29,16 @@ hoverCopyPic = pyglet.image.load("clip2.png")
 hoverCopyPic.width = imgWidth
 hoverCopyPic.height = imgHeight
 
+lockPic = pyglet.image.load("lock.png")
+lockImgWidth = 15
+lockImgHeight = 16
+lockPic.width = lockImgWidth
+lockPic.height = lockImgHeight
+
+unlockPic = pyglet.image.load("unlock.png")
+unlockPic.width = lockImgWidth
+unlockPic.height = lockImgHeight
+
 # Rgb code text
 labelText = "Pic a color"
 rgbLabel = pyglet.text.Label(labelText,
@@ -48,14 +58,21 @@ hexLabel = pyglet.text.Label(hexCodeText,
 helpText = pyglet.text.Label("Press L to lock / unlock color",
                         font_name=["Helvetica", "Times New Roman"], color=(0, 0, 0, 255),
                         font_size=12,
-                        x=200, y= 14,
+                        x=200, y= 14,  # x=200 on puolivälissä 
                         anchor_x='center', anchor_y='center')
 
+# # Help text "and" 
+# helpText2 = pyglet.text.Label("and",
+#                         font_name=["Helvetica", "Times New Roman"], color=(0, 0, 0, 255),
+#                         font_size=12,
+#                         x=230, y= 14,  # x=200 on puolivälissä 
+#                         anchor_x='center', anchor_y='center')
+
 # Black bordercolor for colorBox
-borderColorBox = shapes.Rectangle(20, 28, 360, 26, (0, 0, 0, 255), batch=batch)
+borderColorBox = shapes.Rectangle(10, 28, 360, 26, (0, 0, 0, 255), batch=batch)
 # ColorBox that changes color 
 colorForBox = (0, 0, 0)
-colorBox = shapes.Rectangle(21, 29, 358, 24, color=colorForBox, batch=batch)
+colorBox = shapes.Rectangle(11, 29, 358, 24, color=colorForBox, batch=batch)
 
 def createWindow():
     @window.event
@@ -66,10 +83,17 @@ def createWindow():
         rgbLabel.draw()
         hexLabel.draw()
         helpText.draw()
+        #helpText2.draw()
         changeRgbLabel()
         changeHexText()
         changeBoxColor()
         rgbToHex()
+
+        if isLockOn == False:
+            unlockPic.blit(x=374, y=35)
+        else:
+            lockPic.blit(x=374, y=35)
+
         if changeCopyPic[0] == "notCopied": # No hover on copy pic
             copyPic.blit(x=170, y=62)
             copyPic.blit(x=340, y=62)
