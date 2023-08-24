@@ -5,17 +5,61 @@ import getpixelcolor
 import pyperclip
 from pyglet import image
 
+# TODO laatikko mikä seuraa hiirtä. Laatikkoon päivittyy väri.
+# Hiiren koordinaatit on olemassa def cursorLocation:ssa
+# Miten teen "laatikon".
+# Miten saan "laatikkoa" liikutettua
+# Miten saan "laatikon" seuraamaan ruudulla
+
 savedRgb = [] # RGB color codes
 savedHex = [] # Hex color codes
+currentColors = [(255, 255, 255), (255, 255, 255), (255, 255, 255)] # Displays previous colors
 isLockOn = False # Locks the current color code
 changeCopyPic = ["notCopied"] # "notCopied", "RgbHover" and "HexHover"
+recentColorsHover = [None] # None, "firstBox", "secondBox", "thirdBox"
 
 window = pyglet.window.Window(400, 100)
 window.set_caption("Color Picker")
 batch = pyglet.graphics.Batch()
 
+
+# --- ALL SHAPES ---
+
 # Makes the background white
 backgroundColorBox = shapes.Rectangle(0, 0, 500, 500, color=(255, 255, 255), batch=batch)
+
+# Bordercolor for colorBox
+borderColorBox = shapes.Rectangle(10, 28, 360, 26, (0, 0, 0, 255), batch=batch)
+# ColorBox that changes color 
+colorForBox = (0, 0, 0)
+colorBox = shapes.Rectangle(11, 29, 358, 24, color=colorForBox, batch=batch)
+
+# Hover
+hoverRecentColor1 = shapes.Rectangle(277, 2, 25, 23, color=(255, 255, 255), batch=batch)
+# Bordercolor for Recent color 1
+borderRecentColorBox1 = shapes.Rectangle(279, 4, 21, 19, color=(0, 0, 0), batch=batch)
+# Recent color 1
+recentColorBox1 = (255, 255, 255)
+recentColor1 = shapes.Rectangle(280, 5, 19, 17, color=recentColorBox1, batch=batch)
+
+# Hover
+hoverRecentColor2 = shapes.Rectangle(312, 2, 25, 23, color=(255, 255, 255), batch=batch)
+# Bordercolor for Recent color 2
+borderRecentColorBox2 = shapes.Rectangle(314, 4, 21, 19, color=(0, 0, 0), batch=batch)
+# Recent color 2
+recentColorBox2 = (255, 255, 255)
+recentColor2 = shapes.Rectangle(315, 5, 19, 17, color=recentColorBox2, batch=batch)
+
+# Hover
+hoverRecentColor3 = shapes.Rectangle(347, 2, 25, 23, color=(255, 255, 255), batch=batch) 
+# Bordercolor for Recent color 3
+borderRecentColorBox3 = shapes.Rectangle(349, 4, 21, 19, color=(0, 0, 0), batch=batch)
+# Recent color 3
+recentColorBox3 = (255, 255, 255)
+recentColor3 = shapes.Rectangle(350, 5, 19, 17, color=recentColorBox3, batch=batch)
+
+
+# --- ALL IMAGES ---
 
 # Copy picture without hover
 copyPic = image.load("clip1.png")
@@ -29,15 +73,20 @@ hoverCopyPic = pyglet.image.load("clip2.png")
 hoverCopyPic.width = imgWidth
 hoverCopyPic.height = imgHeight
 
+# Closed lock pic
 lockPic = pyglet.image.load("lock.png")
 lockImgWidth = 15
 lockImgHeight = 16
 lockPic.width = lockImgWidth
 lockPic.height = lockImgHeight
 
+# Open lock pic
 unlockPic = pyglet.image.load("unlock.png")
 unlockPic.width = lockImgWidth
 unlockPic.height = lockImgHeight
+
+
+# --- ALL TEXTS ---
 
 # Rgb code text
 labelText = "Pic a color"
@@ -58,98 +107,141 @@ hexLabel = pyglet.text.Label(hexCodeText,
 helpText = pyglet.text.Label("Press L to lock / unlock color",
                         font_name=["Helvetica", "Times New Roman"], color=(0, 0, 0, 255),
                         font_size=12,
-                        x=200, y= 14,  # x=200 on puolivälissä 
+                        x=105, y= 14, 
                         anchor_x='center', anchor_y='center')
-
-# # Help text "and" 
-# helpText2 = pyglet.text.Label("and",
-#                         font_name=["Helvetica", "Times New Roman"], color=(0, 0, 0, 255),
-#                         font_size=12,
-#                         x=230, y= 14,  # x=200 on puolivälissä 
-#                         anchor_x='center', anchor_y='center')
-
-# Black bordercolor for colorBox
-borderColorBox = shapes.Rectangle(10, 28, 360, 26, (0, 0, 0, 255), batch=batch)
-# ColorBox that changes color 
-colorForBox = (0, 0, 0)
-colorBox = shapes.Rectangle(11, 29, 358, 24, color=colorForBox, batch=batch)
 
 def createWindow():
     @window.event
     def on_draw():
-        global isLockOn
         window.clear()
         batch.draw()
         rgbLabel.draw()
         hexLabel.draw()
         helpText.draw()
-        #helpText2.draw()
         changeRgbLabel()
         changeHexText()
         changeBoxColor()
+        changeRecentColors()
         rgbToHex()
+        lockStatus()
+        lockPicture()
+        copyPicHover()
+        hoverOnRecentColors()
 
-        if isLockOn == False:
-            unlockPic.blit(x=374, y=35)
-        else:
-            lockPic.blit(x=374, y=35)
-
-        if changeCopyPic[0] == "notCopied": # No hover on copy pic
-            copyPic.blit(x=170, y=62)
-            copyPic.blit(x=340, y=62)
-        elif changeCopyPic[0] == "RgbHover": # Hover on Rgb code copy pic
-            hoverCopyPic.blit(x=170, y=62)
-            copyPic.blit(x=340, y=62)
-        elif changeCopyPic[0] == "HexHover": # Hover on Hex code copy pic
-            copyPic.blit(x=170, y=62)
-            hoverCopyPic.blit(x=340, y=62)
-        if isLockOn is False: # If color lock not on
-            try:
-                x_cursor, y_cursor = cursorLocation()
-                getColor(x_cursor, y_cursor)
-            except TypeError:
-                #print("pyautogui kirjasto toimii vain main screenillä")
-                return
-        else: # If color lock on, do nothing
-            return
     pyglet.app.event_loop.run()
     return window, rgbLabel, hexLabel, batch
+
+def lockStatus(): # Is lock on or off
+    if isLockOn is False:
+        try:
+            x_cursor, y_cursor = cursorLocation()
+            getColor(x_cursor, y_cursor)
+        except TypeError:
+            #print("pyautogui kirjasto toimii vain main screenillä")
+            return
+    else: # If color lock on, do nothing
+        return
+
+def lockPicture(): # Which lock picture to show
+    if isLockOn == False:
+        unlockPic.blit(x=374, y=35)
+    else:
+        lockPic.blit(x=374, y=35)
+
+def copyPicHover(): # Checks which picture is being hovered over
+    if changeCopyPic[0] == "notCopied": # No hover
+        copyPic.blit(x=170, y=62)
+        copyPic.blit(x=340, y=62)
+    elif changeCopyPic[0] == "RgbHover": # Hover on Rgb code copy
+        hoverCopyPic.blit(x=170, y=62)
+        copyPic.blit(x=340, y=62)
+    elif changeCopyPic[0] == "HexHover": # Hover on Hex code copy
+        copyPic.blit(x=170, y=62)
+        hoverCopyPic.blit(x=340, y=62)
+
+def hoverOnRecentColors():
+    # Recent colors hover
+    if recentColorsHover[0] == None:
+        hoverRecentColor1.color = (255, 255, 255)
+        hoverRecentColor2.color = (255, 255, 255)
+        hoverRecentColor3.color = (255, 255, 255)
+    elif recentColorsHover[0] == "firstBox":
+        hoverRecentColor1.color = (0, 0, 0)
+    elif recentColorsHover[0] == "secondBox":
+        hoverRecentColor2.color = (0, 0, 0)
+    elif recentColorsHover[0] == "thirdBox":
+        hoverRecentColor3.color = (0, 0, 0)
 
 # def screenSize():
 #     print(pyautogui.size()) # Prints screen size. Upper left corner (0,0)
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
+    #print(x, y)
     if x in range(171, 188):
         if y in range(64, 90):
             changeCopyPic[0] = "RgbHover"
             return
-            #print(x, y)
     if x in range(341, 358):
         if y in range(64, 90):
             changeCopyPic[0] = "HexHover"
             return
-            #print(x, y)
+    if x in range(279, 299):
+        if y in range(5, 23):
+            if recentColorsHover == []:
+                recentColorsHover.append("firstBox")
+            else:
+                recentColorsHover[0] = "firstBox"
+            return
+    if x in range(314, 335):
+        if y in range(5, 23):
+            if recentColorsHover == []:
+                recentColorsHover.append("secondBox")
+            else:
+                recentColorsHover[0] = "secondBox"            
+            return
+    if x in range(349, 370):
+        if y in range(5, 23):
+            if recentColorsHover == []:
+                recentColorsHover.append("thirdBox")
+            else:
+                recentColorsHover[0] = "thirdBox"
+            return
     else:
         changeCopyPic[0] = "notCopied"
+        recentColorsHover[0] = None
         return
 
 @window.event
 def on_mouse_press(x, y, buttons, modifiers): # Checks if mouse left click is on copy img and copies
     #print(x, y)
-    if x in range(171, 188):
+    # RGB and Hex code copy
+    if x in range(171, 188): # RGB code copy
         if y in range(64, 90):
             rgbCodeCopy = str(savedRgb[-1]).replace("(", "").replace(")", "")
             pyperclip.copy(rgbCodeCopy)
-    if x in range(341, 358):
+    if x in range(341, 358): # Hex code copy
         if y in range(64, 90):
             hexCodeCopy = str(savedHex[-1])
             pyperclip.copy(hexCodeCopy)
+    # Recent colors copy 
+    if x in range(279, 299): # First recent color code copy
+        if y in range(5, 23):
+            color = str(currentColors[0]).replace("(", "").replace(")", "")
+            pyperclip.copy(color)
+    if x in range(314, 335): # Second recent color code copy
+        if y in range(5, 23):
+            color = str(currentColors[1]).replace("(", "").replace(")", "")
+            pyperclip.copy(color)
+    if x in range(349, 370): # Third recent color code copy
+        if y in range(5, 23):
+            color = str(currentColors[2]).replace("(", "").replace(")", "")
+            pyperclip.copy(color)
 
 @window.event
 def on_key_press(symbol, modifiers): # Keyboard input
     global isLockOn
-    print(f"näppäimistön symboli: {symbol} ja modifier: {modifiers}")
+    #print(f"näppäimistön symboli: {symbol} ja modifier: {modifiers}")
     # Key symbol and number:
     # L = 108   Q = 133
     if isLockOn == True and symbol == 108: # Removes color lock
@@ -169,10 +261,12 @@ def cursorLocation():
     else:
         return
 
-def getColor(x, y):
+def getColor(x, y): # Adds color code to list only if previous one was different
     color = getpixelcolor.pixel(x, y)
-    savedRgb.append(color)
-    return color
+    if len(savedRgb) == 0:
+        savedRgb.append(color)
+    elif len(savedRgb) != 0 and savedRgb[-1] != color:
+        savedRgb.append(color)
 
 def rgbToHex(): # Changes RGB code to Hex
     if savedRgb != []:
@@ -196,8 +290,27 @@ def changeBoxColor():
         colorForBox = savedRgb[-1]
         colorBox.color = colorForBox
 
+@window.event
+def changeRecentColors():
+    if len(savedRgb) >= 2 and savedRgb[-1] != savedRgb[-2]:
+        changeColor = savedRgb[-2]
+        if changeColor != currentColors[0] and changeColor != currentColors[1] and changeColor != [2]:
+            first = currentColors[0]
+            second = currentColors[1]
+
+            currentColors[0] = changeColor
+            currentColors[1] = first
+            currentColors[2] = second
+
+            recentColor1.color = changeColor
+            recentColor2.color = currentColors[1]
+            recentColor3.color = currentColors[2]
+        else:
+            return
+
 def main():
     createWindow()
 
 if __name__=="__main__":
     main()
+    #screenSize()
