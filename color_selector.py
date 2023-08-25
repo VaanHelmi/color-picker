@@ -4,6 +4,7 @@ import pyautogui
 import getpixelcolor
 import pyperclip
 from pyglet import image
+from pynput import mouse
 
 # TODO laatikko mikä seuraa hiirtä. Laatikkoon päivittyy väri.
 # Hiiren koordinaatit on olemassa def cursorLocation:ssa
@@ -11,23 +12,28 @@ from pyglet import image
 # Miten saan "laatikkoa" liikutettua
 # Miten saan "laatikon" seuraamaan ruudulla
 
+# Kaksi windowia joista toisessa näkyy pikselin väri? Tyhmä idea
+
 savedRgb = [] # RGB color codes
 savedHex = [] # Hex color codes
 currentColors = [(255, 255, 255), (255, 255, 255), (255, 255, 255)] # Displays previous colors
 isLockOn = False # Locks the current color code
 changeCopyPic = ["notCopied"] # "notCopied", "RgbHover" and "HexHover"
 recentColorsHover = [None] # None, "firstBox", "secondBox", "thirdBox"
+pygletCursor = [None]
+activeColorHover = False
 
 window = pyglet.window.Window(400, 100)
 window.set_caption("Color Picker")
 batch = pyglet.graphics.Batch()
-
 
 # --- ALL SHAPES ---
 
 # Makes the background white
 backgroundColorBox = shapes.Rectangle(0, 0, 500, 500, color=(255, 255, 255), batch=batch)
 
+# Hover
+hoverColorForBox = shapes.Rectangle(9, 27, 362, 28, (0, 0, 0, 255), batch=batch)
 # Bordercolor for colorBox
 borderColorBox = shapes.Rectangle(10, 28, 360, 26, (0, 0, 0, 255), batch=batch)
 # ColorBox that changes color 
@@ -58,6 +64,12 @@ borderRecentColorBox3 = shapes.Rectangle(349, 4, 21, 19, color=(0, 0, 0), batch=
 recentColorBox3 = (255, 255, 255)
 recentColor3 = shapes.Rectangle(350, 5, 19, 17, color=recentColorBox3, batch=batch)
 
+
+# TESTILAATIKKO
+xTesti = 380
+yTesti = 5
+# variLaatikko = Tähän muuttuva väri
+testiLaatikko = shapes.Rectangle(xTesti, yTesti, 20, 20, color=(60, 255, 60), batch=batch)
 
 # --- ALL IMAGES ---
 
@@ -127,6 +139,7 @@ def createWindow():
         lockPicture()
         copyPicHover()
         hoverOnRecentColors()
+        hoverOnActiveColor()
 
     pyglet.app.event_loop.run()
     return window, rgbLabel, hexLabel, batch
@@ -135,7 +148,7 @@ def lockStatus(): # Is lock on or off
     if isLockOn is False:
         try:
             x_cursor, y_cursor = cursorLocation()
-            getColor(x_cursor, y_cursor)
+            addDifferentColor(x_cursor, y_cursor)
         except TypeError:
             #print("pyautogui kirjasto toimii vain main screenillä")
             return
@@ -172,12 +185,21 @@ def hoverOnRecentColors():
     elif recentColorsHover[0] == "thirdBox":
         hoverRecentColor3.color = (0, 0, 0)
 
+def hoverOnActiveColor():
+    #print(activeColorHover)
+    if activeColorHover == False:
+        hoverColorForBox.color = (255, 255, 255)
+    else:
+        hoverColorForBox.color = (0, 0, 0)
+
 # def screenSize():
 #     print(pyautogui.size()) # Prints screen size. Upper left corner (0,0)
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
+    global activeColorHover
     #print(x, y)
+    pygletCursor[0] = (x, y)
     if x in range(171, 188):
         if y in range(64, 90):
             changeCopyPic[0] = "RgbHover"
@@ -207,13 +229,46 @@ def on_mouse_motion(x, y, dx, dy):
             else:
                 recentColorsHover[0] = "thirdBox"
             return
+    if y in range(30, 55):
+        #print(y)
+        if x in range(10, 370):
+            #print(x)
+            activeColorHover = True
+            #print(activeColorHover)
+            return
     else:
         changeCopyPic[0] = "notCopied"
         recentColorsHover[0] = None
+        activeColorHover = False
+        #print(activeColorHover)
         return
+    
+
+#-----------------------------------------------------------------------------------
+def on_click(x, y, button, pressed): # Gets clicks outside of pyglet screen
+    global isLockOn
+    if isLockOn == False:
+        if pressed == True:
+            isLockOn = True
+            if x >= 0:
+                copyCurrentColor(x, y)
+        # if not pressed:
+        #     # Stop listener
+        #     return False    
+
+listener = mouse.Listener(
+    on_click=on_click)
+listener.start()
+
+def copyCurrentColor(x, y): # Copies clicked pixels colorcode as RGB
+    colorCode = getpixelcolor.pixel(x, y)
+    codeToCopy = str(colorCode)
+    pyperclip.copy(codeToCopy)
+#-----------------------------------------------------------------------------------
 
 @window.event
 def on_mouse_press(x, y, buttons, modifiers): # Checks if mouse left click is on copy img and copies
+    global isLockOn
     #print(x, y)
     # RGB and Hex code copy
     if x in range(171, 188): # RGB code copy
@@ -237,6 +292,10 @@ def on_mouse_press(x, y, buttons, modifiers): # Checks if mouse left click is on
         if y in range(5, 23):
             color = str(currentColors[2]).replace("(", "").replace(")", "")
             pyperclip.copy(color)
+    # Unlock colors when cliking on lock picture
+    if x in range(376, 388):
+        if y in range(35, 53):
+            isLockOn = False
 
 @window.event
 def on_key_press(symbol, modifiers): # Keyboard input
@@ -261,7 +320,7 @@ def cursorLocation():
     else:
         return
 
-def getColor(x, y): # Adds color code to list only if previous one was different
+def addDifferentColor(x, y): # Adds color code to list only if previous one was different
     color = getpixelcolor.pixel(x, y)
     if len(savedRgb) == 0:
         savedRgb.append(color)
