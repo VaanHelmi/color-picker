@@ -10,18 +10,18 @@ from pyglet.gl import *
 
 glEnable(GL_DEPTH_TEST)
 
-mainWin = pyglet.window.Window(300, 80)
+mainWin = pyglet.window.Window(160, 80)
 batch = pyglet.graphics.Batch()
-mainWinBgColor = shapes.Rectangle(0, 0, 300, 80, color=(255, 255, 255), batch=batch)
+mainWinBgColor = shapes.Rectangle(0, 0, 160, 80, color=(255, 255, 255), batch=batch)
 
 rgbCode = [(0, 0, 0)]
 hexCode = ["f"]
 
-testText2 = pyglet.text.Label(hexCode[0],
+hexCodeText = pyglet.text.Label(hexCode[0],
                           font_name='Times New Roman',
                           font_size=14,
                           color=(24, 24, 24, 255),
-                          x=70, y=40,
+                          x=50, y=40,
                           anchor_x='center', anchor_y='center', batch=batch)
 
 secondWin = pyglet.window.Window(40, 40, style="overlay")
@@ -35,8 +35,6 @@ screenCoords = [(0, 0)]
 cursorPositionPyglet = [(0, 0)]
 suppressOn = True
 copyLock = False
-
-
 
 @mainWin.event # Close both windows
 def on_close():
@@ -70,7 +68,7 @@ def hideSecondWin():
     secondWin.set_visible(False)
 
 def CursorOnButton(x, y):
-    if x in range(263, 290):
+    if x in range(120, 157):
         if y in range(27, 53):
             return True
 
@@ -110,9 +108,9 @@ def win32_event_filter(msg, data):
 listener = mouse.Listener(win32_event_filter=win32_event_filter)
 listener.start()
 
-def changeText():
+def changeHexText():
     code = rgbToHex()
-    testText2.text = code
+    hexCodeText.text = code
 
 def rgbToHex():
     code = '#%02x%02x%02x' % rgbCode[0]
@@ -124,13 +122,13 @@ def on_draw():
     getScreenCoordinates()
     SecondWinLocation()
     batch.draw()
-    changeText()
+    changeHexText()
     if copyLock == True and suppressOn == False:
         hideSecondWin()
     if suppressOn == False:
-        activePicker.blit(263, 27, -0.5)
+        activePicker.blit(120, 27, -0.5)
     if suppressOn == True:
-        unactivePicker.blit(263, 27, 0)
+        unactivePicker.blit(120, 27, 0)
     if copyLock == False:
         getColor()
 
