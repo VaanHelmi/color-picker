@@ -10,26 +10,26 @@ from pyglet.gl import *
 
 glEnable(GL_DEPTH_TEST)
 
-mainWin = pyglet.window.Window(200, 80)
+mainWin = pyglet.window.Window(250, 80)
 batch = pyglet.graphics.Batch()
-mainWinBgColor = shapes.Rectangle(0, 0, 200, 80, color=(255, 255, 255), batch=batch)
+mainWinBgColor = shapes.Rectangle(0, 0, 250, 80, color=(255, 255, 255), batch=batch)
 
 rgbCode = [(0, 0, 0)]
 hexCode = ["f"]
 
 rgbCodeText = pyglet.text.Label("color",
-                          font_name='Times New Roman',
+                          font_name='Consolas',
                           font_size=12,
                           color=(24, 24, 24, 255),
-                          x=54, y=60,
-                          anchor_x='center', anchor_y='center', batch=batch)
+                          x=15, y=60,
+                          anchor_x='left', anchor_y='center', batch=batch)
 
 hexCodeText = pyglet.text.Label(hexCode[0],
-                          font_name='Times New Roman',
+                          font_name='Consolas',
                           font_size=12,
                           color=(24, 24, 24, 255),
-                          x=50, y=25,
-                          anchor_x='center', anchor_y='center', batch=batch)
+                          x=15, y=25,
+                          anchor_x='left', anchor_y='center', batch=batch)
 
 secondWin = pyglet.window.Window(40, 40, style="overlay")
 secondWinBgColor = shapes.Rectangle(0, 0, 40, 40, color=(255, 255, 255))
@@ -75,12 +75,17 @@ def showSecondWin():
 def hideSecondWin():
     secondWin.set_visible(False)
 
-def CursorOnButton(x, y):
-    if x in range(166, 192):
-        if y in range(46, 71):
+def cursorOnButton(x, y):
+    if x in range(215, 244):
+        if y in range(25, 53):
             return True
 
-def cursorOnCopyIcon(x, y):
+def cursorOnRgbIcon(x, y):
+    if x in range(140, 159):
+        if y in range(45, 73):
+            return True    
+
+def cursorOnHexIcon(x, y): 
     if x in range(91, 106):
         if y in range(15, 37):
             return True
@@ -90,12 +95,14 @@ def on_mouse_press(x, y, button, modifiers):
     global suppressOn
     global copyLock
 
-    if button == 1 and CursorOnButton(x, y) == True:
+    if button == 1 and cursorOnButton(x, y) == True:
         showSecondWin()
         suppressOn = True
         copyLock = False
-    elif button == 1 and cursorOnCopyIcon(x, y) == True:
+    elif button == 1 and cursorOnHexIcon(x, y) == True:
         pyperclip.copy(hexCodeText.text)
+    elif button == 1 and cursorOnHexIcon(x, y) == True:
+        pyperclip.copy(rgbCodeText.text)
 
 @mainWin.event # Pyglet window mouse coordinates
 def on_mouse_motion(x, y, dx, dy):
@@ -106,9 +113,6 @@ def copyColorCode():
     colorCode = rgb.replace("(", "").replace(")", "")
     pyperclip.copy(colorCode)
     rgbCode[0] = (colorCodes[-1])
-
-# --------------------------------------------------------------------
-# Pynput
 
 def win32_event_filter(msg, data):
     global suppressOn
@@ -125,7 +129,6 @@ listener.start()
 
 def changeRgbText():
     r, g, b = rgbCode[0]
-
     rgbCodeText.text = f"{r}, {g}, {b}"
 
 def changeHexText():
@@ -133,10 +136,9 @@ def changeHexText():
     hexCodeText.text = code
 
 def rgbToHex():
-    code = '#%02x%02x%02x' % rgbCode[0]
+    code = '%02x%02x%02x' % rgbCode[0]
     return code
 
-# --------------------------------------------------------------------
 @mainWin.event
 def on_draw():
     getScreenCoordinates()
@@ -145,12 +147,13 @@ def on_draw():
     changeRgbText()
     changeHexText()
     copyIcon.blit(90, 12)
+    copyIcon.blit(140, 45)
     if copyLock == True and suppressOn == False:
         hideSecondWin()
     if suppressOn == False:
-        activePicker.blit(165, 45, -0.5)
+        activePicker.blit(215, 25, -0.5)
     if suppressOn == True:
-        unactivePicker.blit(165, 45, 0)
+        unactivePicker.blit(215, 25, 0)
     if copyLock == False:
         getColor()
 
