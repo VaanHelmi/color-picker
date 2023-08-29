@@ -80,6 +80,11 @@ def CursorOnButton(x, y):
         if y in range(46, 71):
             return True
 
+def cursorOnCopyIcon(x, y):
+    if x in range(91, 106):
+        if y in range(15, 37):
+            return True
+
 @mainWin.event # Pyglet mouse clicks
 def on_mouse_press(x, y, button, modifiers):
     global suppressOn
@@ -89,6 +94,8 @@ def on_mouse_press(x, y, button, modifiers):
         showSecondWin()
         suppressOn = True
         copyLock = False
+    elif button == 1 and cursorOnCopyIcon(x, y) == True:
+        pyperclip.copy(hexCodeText.text)
 
 @mainWin.event # Pyglet window mouse coordinates
 def on_mouse_motion(x, y, dx, dy):
