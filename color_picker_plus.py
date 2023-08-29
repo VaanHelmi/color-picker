@@ -17,11 +17,18 @@ mainWinBgColor = shapes.Rectangle(0, 0, 160, 80, color=(255, 255, 255), batch=ba
 rgbCode = [(0, 0, 0)]
 hexCode = ["f"]
 
+rgbCodeText = pyglet.text.Label("color",
+                          font_name='Times New Roman',
+                          font_size=12,
+                          color=(24, 24, 24, 255),
+                          x=54, y=60,
+                          anchor_x='center', anchor_y='center', batch=batch)
+
 hexCodeText = pyglet.text.Label(hexCode[0],
                           font_name='Times New Roman',
-                          font_size=14,
+                          font_size=12,
                           color=(24, 24, 24, 255),
-                          x=50, y=40,
+                          x=50, y=25,
                           anchor_x='center', anchor_y='center', batch=batch)
 
 secondWin = pyglet.window.Window(40, 40, style="overlay")
@@ -108,6 +115,11 @@ def win32_event_filter(msg, data):
 listener = mouse.Listener(win32_event_filter=win32_event_filter)
 listener.start()
 
+def changeRgbText():
+    r, g, b = rgbCode[0]
+
+    rgbCodeText.text = f"{r}, {g}, {b}"
+
 def changeHexText():
     code = rgbToHex()
     hexCodeText.text = code
@@ -122,6 +134,7 @@ def on_draw():
     getScreenCoordinates()
     SecondWinLocation()
     batch.draw()
+    changeRgbText()
     changeHexText()
     if copyLock == True and suppressOn == False:
         hideSecondWin()
