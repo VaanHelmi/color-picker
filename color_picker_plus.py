@@ -10,9 +10,9 @@ from pyglet.gl import *
 
 glEnable(GL_DEPTH_TEST)
 
-mainWin = pyglet.window.Window(160, 80)
+mainWin = pyglet.window.Window(200, 80)
 batch = pyglet.graphics.Batch()
-mainWinBgColor = shapes.Rectangle(0, 0, 160, 80, color=(255, 255, 255), batch=batch)
+mainWinBgColor = shapes.Rectangle(0, 0, 200, 80, color=(255, 255, 255), batch=batch)
 
 rgbCode = [(0, 0, 0)]
 hexCode = ["f"]
@@ -36,6 +36,7 @@ secondWinBgColor = shapes.Rectangle(0, 0, 40, 40, color=(255, 255, 255))
 
 activePicker = image.load("onPicker.png")
 unactivePicker = image.load("offPicker.png")
+copyIcon = image.load("copyIcon.png")
 
 colorCodes = [(255, 255, 255)]
 screenCoords = [(0, 0)]
@@ -75,8 +76,8 @@ def hideSecondWin():
     secondWin.set_visible(False)
 
 def CursorOnButton(x, y):
-    if x in range(120, 157):
-        if y in range(27, 53):
+    if x in range(166, 192):
+        if y in range(46, 71):
             return True
 
 @mainWin.event # Pyglet mouse clicks
@@ -136,12 +137,13 @@ def on_draw():
     batch.draw()
     changeRgbText()
     changeHexText()
+    copyIcon.blit(90, 12)
     if copyLock == True and suppressOn == False:
         hideSecondWin()
     if suppressOn == False:
-        activePicker.blit(120, 27, -0.5)
+        activePicker.blit(165, 45, -0.5)
     if suppressOn == True:
-        unactivePicker.blit(120, 27, 0)
+        unactivePicker.blit(165, 45, 0)
     if copyLock == False:
         getColor()
 
