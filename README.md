@@ -1,7 +1,7 @@
 
-# Color Selector
+# Color Picker
 
-Color selector is a tool for copying RGB and Hex color codes from anywhere on screen.
+Color Picker is a tool for copying RGB and Hex color codes from anywhere on screen.
 
 The project is written in python. 
 Libraries used:
