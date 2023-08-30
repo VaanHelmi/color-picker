@@ -44,7 +44,7 @@ cursorPositionPyglet = [(0, 0)]
 suppressOn = True
 copyLock = False
 
-@mainWin.event # Close both windows
+@mainWin.event
 def on_close():
     secondWin.close()
 
@@ -90,7 +90,7 @@ def cursorOnHexIcon(x, y):
         if y in range(15, 37):
             return True
 
-@mainWin.event # Pyglet mouse clicks
+@mainWin.event
 def on_mouse_press(x, y, button, modifiers):
     global suppressOn
     global copyLock
@@ -99,12 +99,13 @@ def on_mouse_press(x, y, button, modifiers):
         showSecondWin()
         suppressOn = True
         copyLock = False
+        secondWin.switch_to()
     elif button == 1 and cursorOnHexIcon(x, y) == True:
         pyperclip.copy(hexCodeText.text)
-    elif button == 1 and cursorOnHexIcon(x, y) == True:
+    elif button == 1 and cursorOnRgbIcon(x, y) == True:
         pyperclip.copy(rgbCodeText.text)
 
-@mainWin.event # Pyglet window mouse coordinates
+@mainWin.event
 def on_mouse_motion(x, y, dx, dy):
     cursorPositionPyglet[0] = (x, y)
 
@@ -141,9 +142,11 @@ def rgbToHex():
 
 @mainWin.event
 def on_draw():
+    mainWin.clear()
     getScreenCoordinates()
     SecondWinLocation()
     batch.draw()
+    mainWin.switch_to()
     changeRgbText()
     changeHexText()
     copyIcon.blit(90, 12)
@@ -156,9 +159,11 @@ def on_draw():
         unactivePicker.blit(215, 25, 0)
     if copyLock == False:
         getColor()
+    secondWin.switch_to()
 
 @secondWin.event
 def on_draw():
+    secondWin.clear()
     secondWinBgColor.draw()
     changeSecWinColor()
 

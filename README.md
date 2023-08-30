@@ -13,7 +13,7 @@ Libraries used:
 
 ## How to run
 
-Download the files and run the color_picker_plus.py file in your terminal with python.
+Download the files and run the color_picker_plus.py file in your terminal.
 
 ## How to use
 
@@ -22,5 +22,3 @@ Once you use mouse left click the pixel you chose is copied on your clipboard in
 If you want to copy the same color in Hex, you can do so by clicking the copy icon next to the Hex code.
 
 Choose a new color to copy by clicking the pipet icon. 
-
-
